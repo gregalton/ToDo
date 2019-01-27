@@ -36,6 +36,22 @@ class ToDoController: UITableViewController {
             tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
         }
     }
-
+    
+    //mark - Add Items
+    @IBAction func addItemPressed(_ sender: UIBarButtonItem) {
+        var localTextField = UITextField()
+        let alert = UIAlertController(title: "Add Item", message: nil, preferredStyle: .alert)
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //the resulting action
+            print("adding item: ", localTextField.text)
+        }
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new todo"
+            localTextField = alertTextField
+        }
+        alert.addAction(action)
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
