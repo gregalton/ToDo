@@ -21,7 +21,7 @@ class PersistentService {
     
     static var persistentContainer: NSPersistentContainer = {
         
-        let container = NSPersistentContainer(name: "QuickList")
+        let container = NSPersistentContainer(name: "ToDo")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 

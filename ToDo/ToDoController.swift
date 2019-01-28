@@ -7,14 +7,21 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoController: UITableViewController {
     
-    var items = ["Shop for Groceries", "Eat Out", "Watch TV", "Fall Asleep"]
+    var items = [ToDoItem]()
+    //var items = ["Shop for Groceries", "Eat Out", "Watch TV", "Fall Asleep"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        //title = "ToDo"
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        getItems()
     }
     
     //mark - TableView Datasource
@@ -24,7 +31,8 @@ class ToDoController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let itemCell: UITableViewCell = tableView.dequeueReusableCell(withIdentifier: "itemCell", for: indexPath)
-        itemCell.textLabel?.text = items[indexPath.row]
+        let record = items[indexPath.row]
+        itemCell.textLabel?.text = record.title
         return itemCell
     }
 
@@ -39,10 +47,18 @@ class ToDoController: UITableViewController {
     
     //mark - Add Items
     @IBAction func addItemPressed(_ sender: UIBarButtonItem) {
+        presentAddItem()
+    }
+    
+    func presentAddItem() {
         var localTextField = UITextField()
         let alert = UIAlertController(title: "Add Item", message: nil, preferredStyle: .alert)
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //the resulting action
+            let entity = NSEntityDescription.entity(forEntityName: "ToDoItem", in: PersistentService.context)
+            guard let item = NSManagedObject(entity: entity!, insertInto: PersistentService.context) as? ToDoItem else {return}
+            item.title = localTextField.text
+            self.saveItem(item: item)
             print("adding item: ", localTextField.text)
         }
         alert.addTextField { (alertTextField) in
@@ -51,6 +67,25 @@ class ToDoController: UITableViewController {
         }
         alert.addAction(action)
         present(alert, animated: true, completion: nil)
+    }
+    
+    //mark - CoreData
+    func getItems() {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "ToDoItem")
+        
+        do {
+            items = try PersistentService.context.fetch(request) as! [ToDoItem]
+        } catch {
+            fatalError("Failed to fetch list items: \(error)")
+        }
+        self.tableView.reloadData()
+    }
+    
+    func saveItem(item: ToDoItem) {
+        let entity = NSEntityDescription.entity(forEntityName: "ToDoItem", in: PersistentService.context)
+        let record = NSManagedObject(entity: entity!, insertInto: PersistentService.context) as? ToDoItem
+        record?.title = item.title
+        PersistentService.saveContext()
     }
     
 }
